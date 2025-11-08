@@ -1,0 +1,276 @@
+{
+    "types": [
+        {
+            "name": "player",
+            "primitive type": "one of",
+            "value": [{"type": "string","value": "X"}, {"type": "string","value": "O"}]
+        },
+        {
+            "name": "axis index",
+            "primitive type": "ranged integer",
+            "range": {
+                "from": 1,
+                "to": 3
+            }
+        },
+        {
+            "name": "axis xy record",
+            "primitive type": "record",
+            "fields": [
+                {
+                    "name": "x",
+                    "value": "axis index"
+                },
+                {
+                    "name": "y",
+                    "value": "axis index"
+                }
+            ]
+        },
+        {
+            "name": "field",
+            "primitive type": "indexed array",
+            "dimensions": "axis xy record",
+            "values type": {
+                "type": "maybe",
+                "of": "player"
+            }
+        }
+    ],
+    "data": [
+        {
+            "name": "indexer of field",
+            "type": "axis xy record",
+            "initial value": {
+                "x": 1,
+                "y": 1
+            }
+        },
+        {
+            "name": "field",
+            "type": "field",
+            "initial value": {
+                "all": "Nothing"
+            }
+        },
+        {
+            "name": "turn",
+            "type": "player",
+            "initial value": "X"
+        },
+        {
+            "name": "has winner",
+            "type": "boolean",
+            "initial value": false
+        }
+    ],
+    "foreign functions": [
+        {
+            "name": "ask coordinates from player",
+            "paramaters": {
+                "active player": {
+                    "type": "player"
+                }
+            },
+            "returns": {
+                "type": "axis xy record"
+            }
+        },
+        {
+            "name": "check winner",
+            "paramaters": {
+                "active player": {
+                    "type": "player"
+                }
+            },
+            "returns": {
+                "type": "boolean"
+            }
+        },
+        {
+            "name": "declare winner",
+            "paramaters": {
+                "active player": {
+                    "type": "player"
+                }
+            },
+            "returns": {}
+        }
+    ],
+    "program": {
+        "nodes":[
+            {
+                "uid": "start",
+                "type": "start"
+            },
+            {
+                "uid": "ask coords",
+                "type": "foreign function",
+                "apply": {
+                    "name":"ask coordinates from player",
+                    "paramaters": {
+                        "active player": "turn"
+                    },
+                    "store result in": "indexer of field"
+                }
+            },
+            {
+                "uid": "store chosen",
+                "type": "store",
+                "in": "field",
+                "indexed by": "indexer of field",
+                "value": "turn"
+            },
+            {
+                "uid": "check winner",
+                "type": "foreign function",
+                "apply": {
+                    "name":"check winner",
+                    "paramaters": {
+                        "field": "field"
+                    },
+                    "store result in": "has winner"
+                }
+            },
+            {
+                "uid": "switch check winner",
+                "type": "switch",
+                "name": "has winner?",
+                "branches": [
+                    {
+                        "name": "yes",
+                        "case": {
+                            "type": "=",
+                            "which": ["has winner", true]
+                        }
+                    },
+                    {
+                        "name": "no",
+                        "case": {
+                            "type": "else"
+                        }
+                    }
+                ]
+            },
+            {
+                "uid": "declare winner",
+                "type": "foreign function",
+                "apply": {
+                    "name":"declare winner",
+                    "paramaters": {
+                        "active player": "turn"
+                    }
+                }
+            },
+            {
+                "uid": "how to change turn",
+                "type": "switch",
+                "name": "turn is?",
+                "branches": [
+                    {
+                        "name": "X",
+                        "case": {
+                            "type": "=",
+                            "which": ["turn", "X"]
+                        }
+                    },
+                    {
+                        "name": "O",
+                        "case": {
+                            "type": "else"
+                        }
+                    }
+                ]
+            },
+            {
+                "uid": "set turn x",
+                "type": "store",
+                "in": "turn",
+                "value": "X"
+            },
+            {
+                "uid": "set turn o",
+                "type": "store",
+                "in": "turn",
+                "value": "O"
+            },
+            {
+                "uid": "end",
+                "type": "end"
+            }
+
+        ],
+        "arrows": [
+            {
+                "from": {
+                    "uid": "start"
+                },
+                "to": "ask coords"
+            },
+            {
+                "from": {
+                    "uid": "ask coords"
+                },
+                "to": "store chosen"
+            },
+            {
+                "from": {
+                    "uid": "store chosen"
+                },
+                "to": "check winner"
+            },
+            {
+                "from": {
+                    "uid": "check winner"
+                },
+                "to": "switch check winner"
+            },
+            {
+                "from": {
+                    "uid": "switch check winner",
+                    "branch": "yes"
+                },
+                "to": "declare winner"
+            },
+            {
+                "from": {
+                    "uid": "declare winner"
+                },
+                "to": "end"
+            },
+            {
+                "from": {
+                    "uid": "switch check winner",
+                    "branch": "no"
+                },
+                "to": "how to change turn"
+            },
+            {
+                "from": {
+                    "uid": "how to change turn",
+                    "branch": "X"
+                },
+                "to": "set turn o"
+            },
+            {
+                "from": {
+                    "uid": "set turn o"
+                },
+                "to": "ask coords"
+            },
+            {
+                "from": {
+                    "uid": "how to change turn",
+                    "branch": "O"
+                },
+                "to": "set turn x"
+            },
+            {
+                "from": {
+                    "uid": "set turn x"
+                },
+                "to": "ask coords"
+            }
+        ]
+    }
+}
