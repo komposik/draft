@@ -32,7 +32,7 @@
             "primitive type": "indexed array",
             "dimensions": "axis xy record",
             "values type": {
-                "type": "maybe",
+                "primitive type": "maybe",
                 "of": "player"
             }
         }
@@ -99,10 +99,6 @@
     ],
     "program": {
         "nodes":[
-            {
-                "uid": "start",
-                "type": "start"
-            },
             {
                 "uid": "ask coords",
                 "type": "foreign function",
@@ -193,12 +189,7 @@
                 "type": "store",
                 "in": "turn",
                 "value": "O"
-            },
-            {
-                "uid": "end",
-                "type": "end"
             }
-
         ],
         "arrows": [
             {
